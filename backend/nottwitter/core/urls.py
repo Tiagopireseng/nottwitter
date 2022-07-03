@@ -6,4 +6,5 @@ urlpatterns = [
     path('login/', views.login_api, name='login'),
     path('user/', views.get_user_data, name='get_user_data'),
     path('tweets/', views.TweetViewSet.as_view({"get":"list"}), name='tweets'),
+    path('seguir/', views.SeguirViewSet.as_view({"post":"create"}), name='seguir'),
 ]

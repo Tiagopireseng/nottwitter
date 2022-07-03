@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Tweet, Comment
+from .models import Seguir, User, Tweet, Comentar
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -8,14 +8,19 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'username')
 
 
+class SeguirSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seguir
+        fields = ('id', 'user', 'seguindo')
+
 class TweetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tweet
-        fields = ('id','text')
-        read_only=( 'user', 'created_at', 'updated_at','retweet_count', 'like_count','sharedtweet')
+        fields = ('user','id','text')
+        read_only=(  'created_at', 'updated_at','retweet_count', 'like_count','sharedtweet')
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comment
+        model = Comentar
         fields = ('id', 'tweet', 'user', 'text', 'created_at', 'updated_at')

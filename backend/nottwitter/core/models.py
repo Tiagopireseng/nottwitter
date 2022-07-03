@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,User
 
 
-class Comment(models.Model):
+class Comentar(models.Model):
     tweet = models.ForeignKey('Tweet', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
@@ -26,9 +26,9 @@ class Tweet(models.Model):
     def __str__(self):
         return self.text[:20]
 
-class Follow(models.Model):
+class Seguir(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    seguindo = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
 
     def __str__(self):
-        return self.user.username + ' follows ' + self.following.username
+        return self.user.username + ' follows ' + self.seguindo.username

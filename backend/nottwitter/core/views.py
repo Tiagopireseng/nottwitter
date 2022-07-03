@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .models import Tweet
-from .serializers import UserSerializer, TweetSerializer, CommentSerializer
+from .models import Seguir, Tweet
+from .serializers import SeguirSerializer, UserSerializer, TweetSerializer, CommentSerializer
 from django.shortcuts import render,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -80,26 +80,40 @@ def logout(request):
     logout(request)
     return redirect('/login_base')
 
+class SeguirViewSet(viewsets.ModelViewSet):
+    queryset = Seguir.objects.all()
+    serializer_class = SeguirSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        return Seguir.objects.filter(user=self.request.user)
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        seguindo = int(self.request.data['seguindo'])
+        print(seguindo)
+        print(request.data)
+        if user.id == seguindo:
+            return Response({"error": "You can't follow yourself"}, status=400)
+        elif Seguir.objects.filter(user=user, seguindo=seguindo).exists():
+            return Response({"error": "You already follow this user"}, status=400) 
+        else:
+            print(user,seguindo,request.data)
+            Seguir.objects.create(user=user, seguindo=User.objects.get(id=seguindo))
+        return Response({"successo": "Seguiu"})
 
+#Query Tweets by created time and not from active user
 class TweetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tweet.objects.all()
+
     serializer_class = TweetSerializer
+
+    def get_queryset(self):
+        ordering=('-created_at')
+        seguindo = Seguir.objects.filter(user=self.request.user.id)
+
+        return Tweet.objects.filter(user__in=seguindo).order_by(ordering)
+    
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class PostCreateView(LoginRequiredMixin, CreateView):
-    model = Tweet
-    fields = ['text']
-    template_name = 'blog/post_new.html'
-    success_url = '/'
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        data['tag_line'] = 'Add a new post'
-        return data
