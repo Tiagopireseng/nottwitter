@@ -109,11 +109,12 @@ class TweetViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         ordering=('-created_at')
-        seguindo = Seguir.objects.filter(user=self.request.user.id)
+        # queryset = Tweet.objects.all()[0]
+        # print(queryset.user)
+        
+        user=self.request.user
+        seguindo = Seguir.objects.filter(user=user)
+        seguindo_users = [seguindo.seguindo for seguindo in seguindo]
 
-        return Tweet.objects.filter(user__in=seguindo).order_by(ordering)
-    
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        return Tweet.objects.filter(user__in=seguindo_users).order_by(ordering)
 
