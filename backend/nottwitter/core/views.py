@@ -9,10 +9,12 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.views.generic.edit import CreateView
 
+from rest_framework.generics import GenericAPIView
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework import viewsets,permissions
+from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, DestroyModelMixin
 
 from knox.auth import AuthToken
 
@@ -102,9 +104,9 @@ class SeguirViewSet(viewsets.ModelViewSet):
         return Response({"successo": "Seguiu"})
 
 #Query Tweets by created time and not from active user
-class TweetViewSet(viewsets.ReadOnlyModelViewSet):
+class TweetViewSet(viewsets.ModelViewSet):
     queryset = Tweet.objects.all()
-
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = TweetSerializer
 
     def get_queryset(self):
@@ -117,4 +119,13 @@ class TweetViewSet(viewsets.ReadOnlyModelViewSet):
         seguindo_users = [seguindo.seguindo for seguindo in seguindo]
 
         return Tweet.objects.filter(user__in=seguindo_users).order_by(ordering)
+
+    def create(self, request, *args, **kwargs):
+        user = request.user
+        text = request.data['text']
+        Tweet.objects.create(user=user, text=text)
+        return Response({"successo": "Tweeted"})
+
+
+    
 
